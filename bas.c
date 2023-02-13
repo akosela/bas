@@ -96,7 +96,7 @@ static struct Value *eval(struct Value *value, const char *desc);
 static char *mytmpnam(void) /*{{{*/
 {
   static char buf[_POSIX_PATH_MAX];
-  const char *tmpdir;  
+  const char *tmpdir;
   unsigned int i;
   int fd=-1;
 
@@ -819,7 +819,7 @@ static struct Value *assign(struct Value *value) /*{{{*/
       if (used==capacity)
       {
         struct Value **more;
-      
+
         capacity=capacity?2*capacity:2;
         more=realloc(l,capacity*sizeof(*l));
         l=more;
@@ -1244,12 +1244,6 @@ void bas_runLine(const char *runLine) /*{{{*/
 /*}}}*/
 void bas_interpreter(void) /*{{{*/
 {
-  if (FS_istty(STDCHANNEL))
-  {
-    FS_putChars(STDCHANNEL,"bas " VERSION "\n");
-    FS_putChars(STDCHANNEL,"Copyright 1999-2014 Michael Haardt.\n");
-    FS_putChars(STDCHANNEL,_("This is free software with ABSOLUTELY NO WARRANTY.\n"));
-  }
   new();
   while (1)
   {
@@ -1259,7 +1253,6 @@ void bas_interpreter(void) /*{{{*/
     FS_intr=0; stopped=0;
     FS_allowIntr(1);
     FS_nextline(STDCHANNEL);
-    if (FS_istty(STDCHANNEL)) FS_putChars(STDCHANNEL,"> ");
     FS_flush(STDCHANNEL);
     String_new(&s);
     if (FS_appendToString(STDCHANNEL,&s,1)==-1)
