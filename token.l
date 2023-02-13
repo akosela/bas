@@ -75,109 +75,109 @@ static void string2(void) /*{{{*/
 %option noyywrap
 %option nounput
 %x DATAINPUT ELSEIF IMAGEFMT
-REAL		([0-9]+("!"|"#"))|([0-9]+\.[0-9]*(e("+"|"-")?[0-9]+)?("!"|"#")?)|([0-9]*\.[0-9]+(e("+"|"-")?[0-9]+)?("!"|"#")?|([0-9]+e("+"|"-")?[0-9]+("!"|"#")?))
-INTEGER		[0-9]+%?
-HEXINTEGER	&H[0-9A-F]+
-OCTINTEGER	&O[0-7]+
+REAL    ([0-9]+("!"|"#"))|([0-9]+\.[0-9]*(e("+"|"-")?[0-9]+)?("!"|"#")?)|([0-9]*\.[0-9]+(e("+"|"-")?[0-9]+)?("!"|"#")?|([0-9]+e("+"|"-")?[0-9]+("!"|"#")?))
+INTEGER   [0-9]+%?
+HEXINTEGER  &H[0-9A-F]+
+OCTINTEGER  &O[0-7]+
 IDENTIFIER      ("fn"[ \t]+)?[A-Z][A-Z_0-9\.]*("$"|"%"|"#")?
 STRING          \"([^"]|\"\")*\"
-STRING2		\"([^"]|\"\")*$
-REM		rem([^0-9A-Z_\.\n][^\n]*)?
-QUOTE		("'"|"!")[^\n]*
+STRING2   \"([^"]|\"\")*$
+REM   rem([^0-9A-Z_\.\n][^\n]*)?
+QUOTE   ("'"|"!")[^\n]*
 ENDIF           end[ \t]*if
 ENDPROC         end[ \t]*proc
-ENDSELECT	end[ \t]*select
-DOUNTIL		do[ \t]+until
-DOWHILE		do[ \t]+while
-EXITDO		exit[ \t]+do
-EXITFOR		exit[ \t]+for
-LINEINPUT	(line[ \t]+input)|linput
-LOOPUNTIL	loop[ \t]+until
-DATAITEM	[^ \t\n,:][^,:\n]*
-ONERROR		on[ \t]+error
-ONERROROFF	on[ \t]+error[ \t]+off
-ONERRORGOTO0	on[ \t]+error[ \t]+goto[ \t]+0
-SELECTCASE	select[ \t]+case
+ENDSELECT end[ \t]*select
+DOUNTIL   do[ \t]+until
+DOWHILE   do[ \t]+while
+EXITDO    exit[ \t]+do
+EXITFOR   exit[ \t]+for
+LINEINPUT (line[ \t]+input)|linput
+LOOPUNTIL loop[ \t]+until
+DATAITEM  [^ \t\n,:][^,:\n]*
+ONERROR   on[ \t]+error
+ONERROROFF  on[ \t]+error[ \t]+off
+ONERRORGOTO0  on[ \t]+error[ \t]+goto[ \t]+0
+SELECTCASE  select[ \t]+case
  /*}}}*/
 %%
  /* flex rules */ /*{{{*/
   if (matchdata) BEGIN(DATAINPUT);
 
-"#"			return T_CHANNEL;
-{REAL}          	{
-			  int overflow;
-			  double d;
+"#"     return T_CHANNEL;
+{REAL}            {
+        int overflow;
+        double d;
 
-                	  d=Value_vald(yytext,(char**)0,&overflow);
-                	  if (overflow)
-			  {
-			    if (cur) cur->u.junk=yytext[0];
-			    yyless(1);
-			    return T_JUNK;
-			  }
-			  if (cur) cur->u.real=d;
-                	  return T_REAL;
-                	}
-{INTEGER}       	{
-			  int overflow;
-			  long int n;
+                    d=Value_vald(yytext,(char**)0,&overflow);
+                    if (overflow)
+        {
+          if (cur) cur->u.junk=yytext[0];
+          yyless(1);
+          return T_JUNK;
+        }
+        if (cur) cur->u.real=d;
+                    return T_REAL;
+                  }
+{INTEGER}         {
+        int overflow;
+        long int n;
 
-                	  n=Value_vali(yytext,(char**)0,&overflow);
-			  if (overflow)
-			  {
-			    double d;
+                    n=Value_vali(yytext,(char**)0,&overflow);
+        if (overflow)
+        {
+          double d;
 
-			    d=Value_vald(yytext,(char**)0,&overflow);
-			    if (overflow)
-			    {
-			      if (cur) cur->u.junk=yytext[0];
-			      yyless(1);
-			      return T_JUNK;
-			    }
-			    if (cur) cur->u.real=d;
-			    return T_REAL;
-			  }
-                	  if (cur) cur->u.integer=n;
-                  	  return T_INTEGER;
-                	}
-{HEXINTEGER}    	{
-			  int overflow;
-			  long int n;
+          d=Value_vald(yytext,(char**)0,&overflow);
+          if (overflow)
+          {
+            if (cur) cur->u.junk=yytext[0];
+            yyless(1);
+            return T_JUNK;
+          }
+          if (cur) cur->u.real=d;
+          return T_REAL;
+        }
+                    if (cur) cur->u.integer=n;
+                      return T_INTEGER;
+                  }
+{HEXINTEGER}      {
+        int overflow;
+        long int n;
 
-			  n=Value_vali(yytext,(char**)0,&overflow);
-                	  if (overflow)
-                	  {
-                	    if (cur) cur->u.junk=yytext[0];
-                	    yyless(1);
+        n=Value_vali(yytext,(char**)0,&overflow);
+                    if (overflow)
+                    {
+                      if (cur) cur->u.junk=yytext[0];
+                      yyless(1);
                             return T_JUNK;
-                	  }
-                	  if (cur) cur->u.hexinteger=n;
-                	  return T_HEXINTEGER;
-                	}
-{OCTINTEGER}    	{
-			  int overflow;
-			  long int n;
+                    }
+                    if (cur) cur->u.hexinteger=n;
+                    return T_HEXINTEGER;
+                  }
+{OCTINTEGER}      {
+        int overflow;
+        long int n;
 
-                	  n=Value_vali(yytext,(char**)0,&overflow);
-                	  if (overflow)
-                	  {
-                	    if (cur) cur->u.junk=yytext[0];
-                	    yyless(1);
+                    n=Value_vali(yytext,(char**)0,&overflow);
+                    if (overflow)
+                    {
+                      if (cur) cur->u.junk=yytext[0];
+                      yyless(1);
                             return T_JUNK;
-                	  }
-                	  if (cur) cur->u.octinteger=n;
-                	  return T_OCTINTEGER;
-                	}
-{STRING}        	string(yytext); return T_STRING;
-{STRING2}       	string2(); return T_STRING;
-"("|"["             	return T_OP;
-")"|"]"             	return T_CP;
-"*"             	return T_MULT;
-"+"             	return T_PLUS;
-"-"             	return T_MINUS;
-","             	return T_COMMA;
-"/"             	return T_DIV;
-"\\"			{
+                    }
+                    if (cur) cur->u.octinteger=n;
+                    return T_OCTINTEGER;
+                  }
+{STRING}          string(yytext); return T_STRING;
+{STRING2}         string2(); return T_STRING;
+"("|"["               return T_OP;
+")"|"]"               return T_CP;
+"*"               return T_MULT;
+"+"               return T_PLUS;
+"-"               return T_MINUS;
+","               return T_COMMA;
+"/"               return T_DIV;
+"\\"      {
                           if (backslash_colon)
                           {
                             if (cur) cur->statement=stmt_COLON_EOL;
@@ -185,108 +185,108 @@ SELECTCASE	select[ \t]+case
                           }
                           return T_IDIV;
                         }
-":"             	{
+":"               {
                           if (cur)
                           {
                             cur->statement=stmt_COLON_EOL;
                           }
                           return T_COLON;
                         }
-";"             	return T_SEMICOLON;
-"<"             	return T_LT;
-"<="            	return T_LE;
-"=<"            	return T_LE;
-"<>"|"><"            	return T_NE;
-"="             	{
+";"               return T_SEMICOLON;
+"<"               return T_LT;
+"<="              return T_LE;
+"=<"              return T_LE;
+"<>"|"><"             return T_NE;
+"="               {
                           if (cur)
                           {
                             cur->statement=stmt_EQ_FNRETURN_FNEND;
                           }
                           return T_EQ;
                         }
-">"             	return T_GT;
-">="            	return T_GE;
-"=>"            	return T_GE;
-"^"             	return T_POW;
+">"               return T_GT;
+">="              return T_GE;
+"=>"              return T_GE;
+"^"               return T_POW;
 "access"[ \t]+"read"    return T_ACCESS_READ;
 "access"[ \t]+"read"[ \t]+"write"    return T_ACCESS_READ_WRITE;
 "access"[ \t]+"write"   return T_ACCESS_WRITE;
-"and"			return T_AND;
-"as"			return T_AS;
-"call"			{
+"and"     return T_AND;
+"as"      return T_AS;
+"call"      {
                           if (cur)
                           {
                             cur->statement=stmt_CALL;
                           }
                           return T_CALL;
                         }
-"case"[ \t]+"else"	{
-			  if (cur)
-			  {
-			    cur->statement=stmt_CASE;
-			    cur->u.casevalue=malloc(sizeof(struct Casevalue));
-			  }
-			  return T_CASEELSE;
-			}
-"case"			{
-			  if (cur)
-			  {
-			    cur->statement=stmt_CASE;
-			    cur->u.casevalue=malloc(sizeof(struct Casevalue));
-			  }
-			  return T_CASEVALUE;
-			}
-"chdir"			{
+"case"[ \t]+"else"  {
+        if (cur)
+        {
+          cur->statement=stmt_CASE;
+          cur->u.casevalue=malloc(sizeof(struct Casevalue));
+        }
+        return T_CASEELSE;
+      }
+"case"      {
+        if (cur)
+        {
+          cur->statement=stmt_CASE;
+          cur->u.casevalue=malloc(sizeof(struct Casevalue));
+        }
+        return T_CASEVALUE;
+      }
+"chdir"     {
                           if (cur)
                           {
                             cur->statement=stmt_CHDIR_MKDIR;
                           }
                           return T_CHDIR;
                         }
-"clear"         	{
+"clear"           {
                           if (cur)
                           {
                             cur->statement=stmt_CLEAR;
                           }
                           return T_CLEAR;
                         }
-"close"			{
+"close"     {
                           if (cur)
                           {
                             cur->statement=stmt_CLOSE;
                           }
                           return T_CLOSE;
                         }
-"close"/"#"		{
+"close"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_CLOSE;
                           }
                           return T_CLOSE;
                         }
-"cls"|"home"		{
+"cls"|"home"    {
                           if (cur)
                           {
                             cur->statement=stmt_CLS;
                           }
                           return T_CLS;
                         }
-"color"			{
+"color"     {
                           if (cur)
                           {
                             cur->statement=stmt_COLOR;
                           }
                           return T_COLOR;
                         }
-"con"			return T_CON;
-"copy"			{
+"con"     return T_CON;
+"copy"      {
                           if (cur)
                           {
                             cur->statement=stmt_COPY_RENAME;
                           }
                           return T_COPY;
                         }
-"data"|"d."		{
+"data"|"d."   {
                           BEGIN(DATAINPUT);
                           if (cur)
                           {
@@ -294,38 +294,38 @@ SELECTCASE	select[ \t]+case
                           }
                           return T_DATA;
                         }
-<DATAINPUT>{STRING}	string(yytext); return T_STRING;
-<DATAINPUT>{STRING2}	string2(); return T_STRING;
-<DATAINPUT>","		return T_COMMA;
-<DATAINPUT>{DATAITEM}	{
-	                  if (cur) cur->u.datainput=strcpy(malloc(strlen(yytext)+1),yytext);
-			  return T_DATAINPUT;
-			}
+<DATAINPUT>{STRING} string(yytext); return T_STRING;
+<DATAINPUT>{STRING2}  string2(); return T_STRING;
+<DATAINPUT>","    return T_COMMA;
+<DATAINPUT>{DATAITEM} {
+                    if (cur) cur->u.datainput=strcpy(malloc(strlen(yytext)+1),yytext);
+        return T_DATAINPUT;
+      }
 <DATAINPUT>[ \t]+
-<DATAINPUT>\n		BEGIN(INITIAL);
-<DATAINPUT>:		BEGIN(INITIAL); return T_COLON;
-"dec"			{
+<DATAINPUT>\n   BEGIN(INITIAL);
+<DATAINPUT>:    BEGIN(INITIAL); return T_COLON;
+"dec"     {
                           if (cur)
                           {
                             cur->statement=stmt_DEC_INC;
                           }
                           return T_DEC;
                         }
-"defdbl"        	{
+"defdbl"          {
                           if (cur)
                           {
                             cur->statement=stmt_DEFINT_DEFDBL_DEFSTR;
                           }
                           return T_DEFDBL;
                         }
-"defint"        	{
+"defint"          {
                           if (cur)
                           {
                             cur->statement=stmt_DEFINT_DEFDBL_DEFSTR;
                           }
                           return T_DEFINT;
                         }
-"defstr"		{
+"defstr"    {
                           if (cur)
                           {
                             cur->statement=stmt_DEFINT_DEFDBL_DEFSTR;
@@ -333,78 +333,78 @@ SELECTCASE	select[ \t]+case
                           return T_DEFSTR;
                         }
 "def"/[ \t]+fn[ \t]*[A-Z_0-9\.] {
-	                  if (cur)
-	                  {
-	                    cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
-	                    cur->u.localSyms=(struct Symbol*)0;
-	                  }
-	                  return T_DEFFN;
-	                }
+                    if (cur)
+                    {
+                      cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
+                      cur->u.localSyms=(struct Symbol*)0;
+                    }
+                    return T_DEFFN;
+                  }
 "def"/[ \t]+proc[A-Z_0-9\.] {
-	                  if (cur)
-	                  {
-	                    cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
-	                    cur->u.localSyms=(struct Symbol*)0;
-	                  }
-	                  return T_DEFPROC;
-	                }
-"delete"		{
+                    if (cur)
+                    {
+                      cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
+                      cur->u.localSyms=(struct Symbol*)0;
+                    }
+                    return T_DEFPROC;
+                  }
+"delete"    {
                           if (cur)
                           {
                             cur->statement=stmt_DELETE;
                           }
                           return T_DELETE;
                         }
-"dim"           	{
+"dim"             {
                           if (cur)
                           {
                             cur->statement=stmt_DIM;
                           }
                           return T_DIM;
                         }
-"display"		{
+"display"   {
                           if (cur)
                           {
                             cur->statement=stmt_DISPLAY;
                           }
                           return T_DISPLAY;
                         }
-"do"			{
+"do"      {
                           if (cur)
                           {
                             cur->statement=stmt_DO;
                           }
                           return T_DO;
                         }
-{DOUNTIL}		{
+{DOUNTIL}   {
                           if (cur)
                           {
                             cur->statement=stmt_DOcondition;
                           }
                           return T_DOUNTIL;
                         }
-{DOWHILE}		{
+{DOWHILE}   {
                           if (cur)
                           {
                             cur->statement=stmt_DOcondition;
                           }
                           return T_DOWHILE;
                         }
-"edit"			{
+"edit"      {
                           if (cur)
                           {
                             cur->statement=stmt_EDIT;
                           }
                           return T_EDIT;
                         }
-"else"|"el."		{
+"else"|"el."    {
                           if (cur)
                           {
                             cur->statement=stmt_ELSE_ELSEIFELSE;
                           }
                           return T_ELSE;
                         }
-"else"/"if"		{
+"else"/"if"   {
                           BEGIN(ELSEIF);
                           if (cur)
                           {
@@ -412,7 +412,7 @@ SELECTCASE	select[ \t]+case
                           }
                           return T_ELSEIFELSE;
                         }
-<ELSEIF>"if"		{
+<ELSEIF>"if"    {
                           BEGIN(INITIAL);
                           if (cur)
                           {
@@ -420,127 +420,127 @@ SELECTCASE	select[ \t]+case
                           }
                           return T_ELSEIFIF;
                         }
-end[ \t]+function	{
+end[ \t]+function {
                           if (cur)
                           {
                             cur->statement=stmt_ENDFN;
                           }
                           return T_ENDFN;
                         }
-{ENDIF}         	{
+{ENDIF}           {
                           if (cur)
                           {
                             cur->statement=stmt_ENDIF;
                           }
                           return T_ENDIF;
                         }
-{ENDPROC}		{
+{ENDPROC}   {
                           if (cur)
                           {
                             cur->statement=stmt_ENDPROC_SUBEND;
                           }
                           return T_ENDPROC;
                         }
-{ENDSELECT}		{
+{ENDSELECT}   {
                           if (cur)
                           {
                             cur->statement=stmt_ENDSELECT;
                           }
                           return T_ENDSELECT;
                         }
-"end"[ \t]*"sub"	{
+"end"[ \t]*"sub"  {
                           if (cur)
                           {
                             cur->statement=stmt_ENDPROC_SUBEND;
                           }
                           return T_SUBEND;
                         }
-"end"           	{
+"end"             {
                           if (cur)
                           {
                             cur->statement=stmt_END;
                           }
                           return T_END;
                         }
-"environ"		{
+"environ"   {
                           if (cur)
                           {
                             cur->statement=stmt_ENVIRON;
                           }
                           return T_ENVIRON;
                         }
-"erase"         	{
+"erase"           {
                           if (cur)
                           {
                             cur->statement=stmt_ERASE;
                           }
                           return T_ERASE;
                         }
-"eqv"			return T_EQV;
-{EXITDO}		{
+"eqv"     return T_EQV;
+{EXITDO}    {
                           if (cur)
                           {
                             cur->statement=stmt_EXITDO;
                           }
                           return T_EXITDO;
                         }
-{EXITFOR}		{
+{EXITFOR}   {
                           if (cur)
                           {
                             cur->statement=stmt_EXITFOR;
                           }
                           return T_EXITFOR;
                         }
-"exit"[ \t]+"function"	{
+"exit"[ \t]+"function"  {
                           if (cur)
                           {
                             cur->statement=stmt_FNEXIT;
                           }
                           return T_FNEXIT;
                         }
-"exit"[ \t]+"sub"	{
+"exit"[ \t]+"sub" {
                           if (cur)
                           {
                             cur->statement=stmt_SUBEXIT;
                           }
                           return T_SUBEXIT;
                         }
-"field"			{
+"field"     {
                           if (cur)
                           {
                             cur->statement=stmt_FIELD;
                           }
                           return T_FIELD;
                         }
-"field"/"#"		{
+"field"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_FIELD;
                           }
                           return T_FIELD;
                         }
-"files"			{
+"files"     {
                           if (cur)
                           {
                             cur->statement=stmt_FILES;
                           }
                           return T_FILES;
                         }
-"fnend"			{
+"fnend"     {
                           if (cur)
                           {
                             cur->statement=stmt_EQ_FNRETURN_FNEND;
                           }
                           return T_FNEND;
                         }
-"fnreturn"		{
+"fnreturn"    {
                           if (cur)
                           {
                             cur->statement=stmt_EQ_FNRETURN_FNEND;
                           }
                           return T_FNRETURN;
                         }
-"for"           	{
+"for"             {
                           if (cur)
                           {
                             cur->statement=stmt_FOR;
@@ -552,647 +552,654 @@ end[ \t]+function	{
 "for"[ \t]+"append"     return T_FOR_APPEND;
 "for"[ \t]+"random"     return T_FOR_RANDOM;
 "for"[ \t]+"binary"     return T_FOR_BINARY;
-"function"		{
-	                  if (cur)
-	                  {
-	                    cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
-	                    cur->u.localSyms=(struct Symbol*)0;
-	                  }
-	                  return T_FUNCTION;
-	                }
-"get"			{
+"function"    {
+                    if (cur)
+                    {
+                      cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
+                      cur->u.localSyms=(struct Symbol*)0;
+                    }
+                    return T_FUNCTION;
+                  }
+"get"     {
                           if (cur)
                           {
                             cur->statement=stmt_GET_PUT;
                           }
                           return T_GET;
                         }
-"get"/"#"		{
+"get"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_GET_PUT;
                           }
                           return T_GET;
                         }
-"go"[ \t]*"sub"        	{
+"go"[ \t]*"sub"         {
                           if (cur)
                           {
                             cur->statement=stmt_GOSUB;
                           }
                           return T_GOSUB;
                         }
-"go"[ \t]*"to"		{
+"go"[ \t]*"to"    {
                           if (cur)
                           {
                             cur->statement=stmt_RESUME_GOTO;
                           }
                           return T_GOTO;
                         }
-"idn"			return T_IDN;
-"if"            	{
+"idn"     return T_IDN;
+"if"              {
                           if (cur)
                           {
                             cur->statement=stmt_IF_ELSEIFIF;
                           }
                           return T_IF;
                         }
-"image"[ \t]*/[^"\n \t]	{
-			  BEGIN(IMAGEFMT);
-                	  if (cur)
-                	  {
-                	    cur->statement=stmt_IMAGE;
-                	  }
-                	  return T_IMAGE;
-			}
-<IMAGEFMT>.*$		{
-			  BEGIN(INITIAL);
-                	  if (cur)
-                	  {
+"image"[ \t]*/[^"\n \t] {
+        BEGIN(IMAGEFMT);
+                    if (cur)
+                    {
+                      cur->statement=stmt_IMAGE;
+                    }
+                    return T_IMAGE;
+      }
+<IMAGEFMT>.*$   {
+        BEGIN(INITIAL);
+                    if (cur)
+                    {
                             size_t l;
 
-                	    l=strlen(yytext);
+                      l=strlen(yytext);
                             cur->u.string=malloc(sizeof(struct String));
                             String_size(String_new(cur->u.string),l);
                             memcpy(cur->u.string->character,yytext,l);
-                	  }
-                	  return T_STRING;
-                	}
-"image"			{
-                	  if (cur)
-                	  {
-                	    cur->statement=stmt_IMAGE;
-                	  }
-                	  return T_IMAGE;
-                	}
-"imp"			return T_IMP;
-"inc"			{
+                    }
+                    return T_STRING;
+                  }
+"image"     {
+                    if (cur)
+                    {
+                      cur->statement=stmt_IMAGE;
+                    }
+                    return T_IMAGE;
+                  }
+"imp"     return T_IMP;
+"inc"     {
                           if (cur)
                           {
                             cur->statement=stmt_DEC_INC;
                           }
                           return T_INC;
                         }
-"input"			{
+"input"     {
                           if (cur)
                           {
                             cur->statement=stmt_INPUT;
                           }
                           return T_INPUT;
                         }
-"input"/"#"		{
+"input"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_INPUT;
                           }
                           return T_INPUT;
                         }
-"inv"			return T_INV;
-"is"			return T_IS;
-"kill"			{
+"inv"     return T_INV;
+"is"      return T_IS;
+"kill"      {
                           if (cur)
                           {
                             cur->statement=stmt_KILL;
                           }
                           return T_KILL;
                         }
-"let"           	{
-                          if (cur)
-                          {
-                            cur->statement=stmt_LET;
-                          }
-                          return T_LET;
-                        }
-"list"          	{
+"l"               {
                           if (cur)
                           {
                             cur->statement=stmt_LIST_LLIST;
                           }
                           return T_LIST;
                         }
-"llist"			{
+"let"             {
+                          if (cur)
+                          {
+                            cur->statement=stmt_LET;
+                          }
+                          return T_LET;
+                        }
+"list"            {
+                          if (cur)
+                          {
+                            cur->statement=stmt_LIST_LLIST;
+                          }
+                          return T_LIST;
+                        }
+"llist"     {
                           if (cur)
                           {
                             cur->statement=stmt_LIST_LLIST;
                           }
                           return T_LLIST;
                         }
-"load"          	{
+"load"            {
                           if (cur)
                           {
                             cur->statement=stmt_LOAD;
                           }
                           return T_LOAD;
                         }
-"local"			{
+"local"     {
                           if (cur)
                           {
                             cur->statement=stmt_LOCAL;
                           }
                           return T_LOCAL;
                         }
-"locate"		{
+"locate"    {
                           if (cur)
                           {
                             cur->statement=stmt_LOCATE;
                           }
                           return T_LOCATE;
                         }
-"lock"			{
+"lock"      {
                           if (cur)
                           {
                             cur->statement=stmt_LOCK_UNLOCK;
                           }
                           return T_LOCK;
                         }
-"lock"[ \t]+"read"	return T_LOCK_READ;
-"lock"[ \t]+"write"	return T_LOCK_WRITE;
-"loop"			{
+"lock"[ \t]+"read"  return T_LOCK_READ;
+"lock"[ \t]+"write" return T_LOCK_WRITE;
+"loop"      {
                           if (cur)
                           {
                             cur->statement=stmt_LOOP;
                           }
                           return T_LOOP;
                         }
-{LOOPUNTIL}		{
+{LOOPUNTIL}   {
                           if (cur)
                           {
                             cur->statement=stmt_LOOPUNTIL;
                           }
                           return T_LOOPUNTIL;
                         }
-"lprint"		{
+"lprint"    {
                           if (cur)
                           {
                             cur->statement=stmt_PRINT_LPRINT;
                           }
                           return T_LPRINT;
                         }
-"lset"			{
+"lset"      {
                           if (cur)
                           {
                             cur->statement=stmt_LSET_RSET;
                           }
                           return T_LSET;
                         }
-"mat"[ \t]+"input"	{
+"mat"[ \t]+"input"  {
                           if (cur)
                           {
                             cur->statement=stmt_MATINPUT;
                           }
                           return T_MATINPUT;
                         }
-"mat"[ \t]+"print"	{
+"mat"[ \t]+"print"  {
                           if (cur)
                           {
                             cur->statement=stmt_MATPRINT;
                           }
                           return T_MATPRINT;
                         }
-"mat"[ \t]+"read"	{
+"mat"[ \t]+"read" {
                           if (cur)
                           {
                             cur->statement=stmt_MATREAD;
                           }
                           return T_MATREAD;
                         }
-"mat"[ \t]+"redim"	{
+"mat"[ \t]+"redim"  {
                           if (cur)
                           {
                             cur->statement=stmt_MATREDIM;
                           }
                           return T_MATREDIM;
                         }
-"mat"[ \t]+"write"	{
+"mat"[ \t]+"write"  {
                           if (cur)
                           {
                             cur->statement=stmt_MATWRITE;
                           }
                           return T_MATWRITE;
                         }
-"mat"			{
+"mat"     {
                           if (cur)
                           {
                             cur->statement=stmt_MAT;
                           }
                           return T_MAT;
                         }
-"mkdir"			{
+"mkdir"     {
                           if (cur)
                           {
                             cur->statement=stmt_CHDIR_MKDIR;
                           }
                           return T_MKDIR;
                         }
-"mod"           	return T_MOD;
-"new"           	{
+"mod"             return T_MOD;
+"new"             {
                           if (cur)
                           {
                             cur->statement=stmt_NEW;
                           }
                           return T_NEW;
                         }
-"name"			{
+"name"      {
                           if (cur)
                           {
                             cur->statement=stmt_NAME;
                           }
                           return T_NAME;
                         }
-"next"          	{
-                  	  if (cur)
-                  	  {
+"next"            {
+                      if (cur)
+                      {
                             cur->statement=stmt_NEXT;
-                  	    cur->u.next=malloc(sizeof(struct Next));
-                  	  }
-			  return T_NEXT;
-                	}
-"not"			return T_NOT;
-{ONERROROFF}		{
+                        cur->u.next=malloc(sizeof(struct Next));
+                      }
+        return T_NEXT;
+                  }
+"not"     return T_NOT;
+{ONERROROFF}    {
                           if (cur)
                           {
                             cur->statement=stmt_ONERROROFF;
                           }
                           return T_ONERROROFF;
                         }
-{ONERRORGOTO0}		{
+{ONERRORGOTO0}    {
                           if (cur)
                           {
                             cur->statement=stmt_ONERRORGOTO0;
                           }
                           return T_ONERRORGOTO0;
                         }
-{ONERROR}		{
+{ONERROR}   {
                           if (cur)
                           {
                             cur->statement=stmt_ONERROR;
                           }
                           return T_ONERROR;
                         }
-"on"			{
-			  if (cur)
-			  {
-			    cur->statement=stmt_ON;
-			    cur->u.on.pcLength=1;
-			    cur->u.on.pc=(struct Pc*)0;
-			  }
-			  return T_ON;
-			}
-"open"			{
+"on"      {
+        if (cur)
+        {
+          cur->statement=stmt_ON;
+          cur->u.on.pcLength=1;
+          cur->u.on.pc=(struct Pc*)0;
+        }
+        return T_ON;
+      }
+"open"      {
                           if (cur)
                           {
                             cur->statement=stmt_OPEN;
                           }
                           return T_OPEN;
                         }
-"option"[ \t]+"base"	{
+"option"[ \t]+"base"  {
                           if (cur)
                           {
                             cur->statement=stmt_OPTIONBASE;
                           }
                           return T_OPTIONBASE;
                         }
-"option"[ \t]+"run"	{
+"option"[ \t]+"run" {
                           if (cur)
                           {
                             cur->statement=stmt_OPTIONRUN;
                           }
                           return T_OPTIONRUN;
                         }
-"option"[ \t]+"stop"	{
+"option"[ \t]+"stop"  {
                           if (cur)
                           {
                             cur->statement=stmt_OPTIONSTOP;
                           }
                           return T_OPTIONSTOP;
                         }
-"or"			return T_OR;
-"out"			{
+"or"      return T_OR;
+"out"     {
                           if (cur)
                           {
                             cur->statement=stmt_OUT_POKE;
                           }
                           return T_OUT;
                         }
-"print"|"p."|"?"	{
+"print"|"p."|"?"  {
                           if (cur)
                           {
                             cur->statement=stmt_PRINT_LPRINT;
                           }
                           return T_PRINT;
                         }
-("print"|"p."|"?")/"#"	{
+("print"|"p."|"?")/"#"  {
                           if (cur)
                           {
                             cur->statement=stmt_PRINT_LPRINT;
                           }
                           return T_PRINT;
                         }
-"poke"			{
+"poke"      {
                           if (cur)
                           {
                             cur->statement=stmt_OUT_POKE;
                           }
                           return T_POKE;
                         }
-"put"			{
+"put"     {
                           if (cur)
                           {
                             cur->statement=stmt_GET_PUT;
                           }
                           return T_PUT;
                         }
-"put"/"#"		{
+"put"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_GET_PUT;
                           }
                           return T_PUT;
                         }
-"randomize"     	{
+"randomize"       {
                           if (cur)
                           {
                             cur->statement=stmt_RANDOMIZE;
                           }
                           return T_RANDOMIZE;
                         }
-"read"			{
+"read"      {
                           if (cur)
                           {
                             cur->statement=stmt_READ;
                           }
                           return T_READ;
                         }
-"renum"|"ren."		{
+"renum"|"ren."    {
                           if (cur)
                           {
                             cur->statement=stmt_RENUM;
                           }
                           return T_RENUM;
                         }
-"repeat"|"rep."		{
+"repeat"|"rep."   {
                           if (cur)
                           {
                             cur->statement=stmt_REPEAT;
                           }
                           return T_REPEAT;
                         }
-"restore"|"res."	{
+"restore"|"res."  {
                           if (cur)
                           {
                             cur->statement=stmt_RESTORE;
                           }
                           return T_RESTORE;
                         }
-"resume"		{
+"resume"    {
                           if (cur)
                           {
                             cur->statement=stmt_RESUME_GOTO;
                           }
                           return T_RESUME;
                         }
-"return"|"r."   	{
+"return"|"r."     {
                           if (cur)
                           {
                             cur->statement=stmt_RETURN;
                           }
                           return T_RETURN;
                         }
-"rset"			{
+"rset"      {
                           if (cur)
                           {
                             cur->statement=stmt_LSET_RSET;
                           }
                           return T_RSET;
                         }
-"run"           	{
+"run"             {
                           if (cur)
                           {
                             cur->statement=stmt_RUN;
                           }
                           return T_RUN;
                         }
-"save"			{
+"save"      {
                           if (cur)
                           {
                             cur->statement=stmt_SAVE;
                           }
                           return T_SAVE;
                         }
-{SELECTCASE}		{
-			  if (cur)
-			  {
-			    cur->statement=stmt_SELECTCASE;
-			    cur->u.selectcase=malloc(sizeof(struct Selectcase));
-			  }
-			  return T_SELECTCASE;
-			}
-"shared"		return T_SHARED;
-"shell"			{
+{SELECTCASE}    {
+        if (cur)
+        {
+          cur->statement=stmt_SELECTCASE;
+          cur->u.selectcase=malloc(sizeof(struct Selectcase));
+        }
+        return T_SELECTCASE;
+      }
+"shared"    return T_SHARED;
+"shell"     {
                           if (cur)
                           {
                             cur->statement=stmt_SHELL;
                           }
                           return T_SHELL;
                         }
-"sleep"			{
+"sleep"     {
                           if (cur)
                           {
                             cur->statement=stmt_SLEEP;
                           }
                           return T_SLEEP;
                         }
-"spc"			return T_SPC;
-"step"          	return T_STEP;
-"stop"          	{
+"spc"     return T_SPC;
+"step"            return T_STEP;
+"stop"            {
                           if (cur)
                           {
                             cur->statement=stmt_STOP;
                           }
                           return T_STOP;
                         }
-"sub"[ \t]*"end"	{
+"sub"[ \t]*"end"  {
                           if (cur)
                           {
                             cur->statement=stmt_ENDPROC_SUBEND;
                           }
                           return T_SUBEND;
                         }
-"sub"[ \t]*"exit"	{
+"sub"[ \t]*"exit" {
                           if (cur)
                           {
                             cur->statement=stmt_SUBEXIT;
                           }
                           return T_SUBEXIT;
                         }
-"sub"			{
-	                  if (cur)
-	                  {
-	                    cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
-	                    cur->u.localSyms=(struct Symbol*)0;
-	                  }
-	                  return T_SUB;
-	                }
-"swap"			{
+"sub"     {
+                    if (cur)
+                    {
+                      cur->statement=stmt_DEFFN_DEFPROC_FUNCTION_SUB;
+                      cur->u.localSyms=(struct Symbol*)0;
+                    }
+                    return T_SUB;
+                  }
+"swap"      {
                           if (cur)
                           {
                             cur->statement=stmt_SWAP;
                           }
                           return T_SWAP;
                         }
-"system"|"bye"        	{
+"system"|"bye"          {
                           if (cur)
                           {
                             cur->statement=stmt_SYSTEM;
                           }
                           return T_SYSTEM;
                         }
-"then"|"th."		return T_THEN;
-"tab"			return T_TAB;
-"to"            	return T_TO;
-"trn"			return T_TRN;
-"troff"         	{
+"then"|"th."    return T_THEN;
+"tab"     return T_TAB;
+"to"              return T_TO;
+"trn"     return T_TRN;
+"troff"           {
                           if (cur)
                           {
                             cur->statement=stmt_TROFF;
                           }
                           return T_TROFF;
                         }
-"tron"          	{
+"tron"            {
                           if (cur)
                           {
                             cur->statement=stmt_TRON;
                           }
                           return T_TRON;
                         }
-"truncate"		{
+"truncate"    {
                           if (cur)
                           {
                             cur->statement=stmt_TRUNCATE;
                           }
                           return T_TRUNCATE;
                         }
-"unlock"		{
+"unlock"    {
                           if (cur)
                           {
                             cur->statement=stmt_LOCK_UNLOCK;
                           }
                           return T_UNLOCK;
                         }
-"unnum"			{
+"unnum"     {
                           if (cur)
                           {
                             cur->statement=stmt_UNNUM;
                           }
                           return T_UNNUM;
                         }
-"until"         	{
+"until"           {
                           if (cur)
                           {
                             cur->statement=stmt_UNTIL;
                           }
                           return T_UNTIL;
                         }
-"using"			return T_USING;
-"wait"			{
+"using"     return T_USING;
+"wait"      {
                           if (cur)
                           {
                             cur->statement=stmt_WAIT;
                           }
                           return T_WAIT;
                         }
-"wend"          	{
-                	  if (cur)
-                	  {
-                	    cur->statement=stmt_WEND;
-                	    cur->u.whilepc=malloc(sizeof(struct Pc));
-                	  }
-                	  return T_WEND;
-                	}
-"while"         	{
-                	  if (cur)
-                	  {
-                	    cur->statement=stmt_WHILE;
-                	    cur->u.afterwend=malloc(sizeof(struct Pc));
-                	  }
-                	  return T_WHILE;
-                	}
-"width"			{
+"wend"            {
+                    if (cur)
+                    {
+                      cur->statement=stmt_WEND;
+                      cur->u.whilepc=malloc(sizeof(struct Pc));
+                    }
+                    return T_WEND;
+                  }
+"while"           {
+                    if (cur)
+                    {
+                      cur->statement=stmt_WHILE;
+                      cur->u.afterwend=malloc(sizeof(struct Pc));
+                    }
+                    return T_WHILE;
+                  }
+"width"     {
                           if (cur)
                           {
                             cur->statement=stmt_WIDTH;
                           }
                           return T_WIDTH;
                         }
-"width"/"#"		{
+"width"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_WIDTH;
                           }
                           return T_WIDTH;
                         }
-"write"			{
+"write"     {
                           if (cur)
                           {
                             cur->statement=stmt_WRITE;
                           }
                           return T_WRITE;
                         }
-"write"/"#"		{
+"write"/"#"   {
                           if (cur)
                           {
                             cur->statement=stmt_WRITE;
                           }
                           return T_WRITE;
                         }
-"xor"			return T_XOR;
-"xref"			{
+"xor"     return T_XOR;
+"xref"      {
                           if (cur)
                           {
                             cur->statement=stmt_XREF;
                           }
                           return T_XREF;
                         }
-"zer"			return T_ZER;
-"zone"			{
+"zer"     return T_ZER;
+"zone"      {
                           if (cur)
                           {
                             cur->statement=stmt_ZONE;
                           }
                           return T_ZONE;
                         }
-{REM}           	{
-                	  if (cur)
-                	  {
-                	    cur->statement=stmt_QUOTE_REM;
-                	    cur->u.rem=strcpy(malloc(strlen(yytext+3)+1),yytext+3);
-                	  }
-                	  return T_REM;
-                	}
-"rename"		{
+{REM}             {
+                    if (cur)
+                    {
+                      cur->statement=stmt_QUOTE_REM;
+                      cur->u.rem=strcpy(malloc(strlen(yytext+3)+1),yytext+3);
+                    }
+                    return T_REM;
+                  }
+"rename"    {
                           if (cur)
                           {
                             cur->statement=stmt_COPY_RENAME;
                           }
                           return T_RENAME;
                         }
-{QUOTE}          	{
-                	  if (cur)
-                	  {
-                	    cur->statement=stmt_QUOTE_REM;
-                	    strcpy(cur->u.rem=malloc(strlen(yytext+1)+1),yytext+1);
-                          }	    
-                	  return T_QUOTE;
-                	}
-{LINEINPUT}		{
+{QUOTE}           {
+                    if (cur)
+                    {
+                      cur->statement=stmt_QUOTE_REM;
+                      strcpy(cur->u.rem=malloc(strlen(yytext+1)+1),yytext+1);
+                          }     
+                    return T_QUOTE;
+                  }
+{LINEINPUT}   {
                           if (cur)
                           {
                             cur->statement=stmt_LINEINPUT;
                           }
                           return T_LINEINPUT;
                         }
-{IDENTIFIER}		{
-			  if (cur)
-			  {
+{IDENTIFIER}    {
+        if (cur)
+        {
                             size_t len;
                             char *s;
                             int fn;
@@ -1210,7 +1217,7 @@ end[ \t]+function	{
                               fn=0;
                             }
                             len+=strlen(s);
-			    cur->u.identifier=malloc(offsetof(struct Identifier,name)+len+1);
+          cur->u.identifier=malloc(offsetof(struct Identifier,name)+len+1);
                             if (fn)
                             {
                               memcpy(cur->u.identifier->name,yytext,2);
@@ -1220,20 +1227,20 @@ end[ \t]+function	{
                             {
                               strcpy(cur->u.identifier->name,s);
                             }
-			    switch (yytext[yyleng-1])
-			    {
-			      case '$': cur->u.identifier->defaultType=V_STRING; break;
-			      case '%': cur->u.identifier->defaultType=V_INTEGER; break;
-			      default: cur->u.identifier->defaultType=V_REAL; break;
-			    }
-			  }
-			  return T_IDENTIFIER;
-			}
+          switch (yytext[yyleng-1])
+          {
+            case '$': cur->u.identifier->defaultType=V_STRING; break;
+            case '%': cur->u.identifier->defaultType=V_INTEGER; break;
+            default: cur->u.identifier->defaultType=V_REAL; break;
+          }
+        }
+        return T_IDENTIFIER;
+      }
 [ \t\n]+
-.			{
-			  if (cur) cur->u.junk=yytext[0];
-			  return T_JUNK;
-			}
+.     {
+        if (cur) cur->u.junk=yytext[0];
+        return T_JUNK;
+      }
  /*}}}*/
 %%
 
@@ -1453,9 +1460,9 @@ void Token_destroy(struct Token *token) /*{{{*/
       case T_OPTIONRUN:         break;
       case T_OPTIONSTOP:        break;
       case T_OR:                break;
-      case T_OUT:		break;
+      case T_OUT:               break;
       case T_PLUS:              break;
-      case T_POKE:		break;
+      case T_POKE:              break;
       case T_POW:               break;
       case T_PRINT:             break;
       case T_PUT:               break;
