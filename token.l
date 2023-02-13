@@ -103,6 +103,13 @@ SELECTCASE  select[ \t]+case
  /* flex rules */ /*{{{*/
   if (matchdata) BEGIN(DATAINPUT);
 
+"!"     {
+        if (cur)
+        {
+          cur->statement=stmt_SHELL;
+        }
+        return T_SHELL;
+        }
 "#"     return T_CHANNEL;
 {REAL}            {
         int overflow;
@@ -915,6 +922,13 @@ end[ \t]+function {
                           }
                           return T_PUT;
                         }
+"r"             {
+                          if (cur)
+                          {
+                            cur->statement=stmt_RUN;
+                          }
+                          return T_RUN;
+                        }
 "randomize"       {
                           if (cur)
                           {
@@ -993,6 +1007,13 @@ end[ \t]+function {
         }
         return T_SELECTCASE;
       }
+"sh"     {
+                          if (cur)
+                          {
+                            cur->statement=stmt_SHELL;
+                          }
+                          return T_SHELL;
+                        }
 "shared"    return T_SHARED;
 "shell"     {
                           if (cur)
@@ -1046,7 +1067,7 @@ end[ \t]+function {
                           }
                           return T_SWAP;
                         }
-"system"|"bye"          {
+"system"|"sys"|"bye"|"q"|"x" {
                           if (cur)
                           {
                             cur->statement=stmt_SYSTEM;
